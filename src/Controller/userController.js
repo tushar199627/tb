@@ -269,14 +269,9 @@ const getuser = async function (req, res) {
   try {
     const users = await UserModel.find();
 
-    let data = {
-      profileImage: users.profileImage,
-      name: users.name,
-      email: users.email,
-      phone: users.phone,
-    };
+  
 
-    res.status(200).send({ status: true, message: "User list", data: data });
+    res.status(200).send({ status: true, message: "User list", data: users });
   } catch (error) {
     return res.status(500).send({ message: error.message });
   }
