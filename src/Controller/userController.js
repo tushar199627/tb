@@ -3,8 +3,11 @@ const jwt = require("jsonwebtoken");
 const { Otp } = require("../Model/otpModel");
 const otpGenerator = require("otp-generator");
 const short = require('shortid');
+require('dotenv').config();
+const client = require('twilio')('AC23815dc1ab54aa8d76831b0e74680e44', '43367b95a79dc769b916d3ce0c66c542')
 
 const { uploadFile } = require("../aws/uploadfile");
+
 
 exports.generateOtp = async function (req, res) {
   const user = await UserModel.findOne({ phone: req.body.phone });
@@ -18,18 +21,25 @@ exports.generateOtp = async function (req, res) {
   });
 
   const phone = req.body.phone;
+  console.log(phone)
   console.log(OTP);
 
   const otp = new Otp({ phone: phone, otp: OTP });
 
-  const result = await otp.save();
+  client.messages
+.create({body: `Hi there ${OTP}`, from: '+16182437377', to: `${phone}`})
+.then(message => console.log(message.sid));
 
-  res.status(200).send("Otp send successfully");
+
+  const result = await otp.save();
+  console.log(result)
+  
+  res.status(200).send({msg: "Otp send successfully"});
 };
 
 const createUser = async function (req, res) {
   try {
-    let data = req.body;
+    let data = req.body; 
 
     let { profileImage, userId,name, emailId, phone, otp, password } = data;
 
@@ -265,12 +275,11 @@ const loginUser = async function (req, res) {
   }
 };
 
+
+
 const getuser = async function (req, res) {
   try {
     const users = await UserModel.find();
-
-  
-
     res.status(200).send({ status: true, message: "User list", data: users });
   } catch (error) {
     return res.status(500).send({ message: error.message });
